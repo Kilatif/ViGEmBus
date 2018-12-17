@@ -19,34 +19,22 @@
 
 #pragma once
 
-#define HID_GET_FEATURE_REPORT_SIZE_0                   0x31
-#define HID_GET_FEATURE_REPORT_SIZE_1                   0x25
-#define HID_GET_FEATURE_REPORT_MAC_ADDRESSES_SIZE       0x10
-
-#define HID_SET_FEATURE_REPORT_SIZE_0                   0x17
-#define HID_SET_FEATURE_REPORT_SIZE_1                   0x11
-
-#define HID_REPORT_ID_0                                 0xA3
-#define HID_REPORT_ID_1                                 0x02
-#define HID_REPORT_MAC_ADDRESSES_ID                     0x12
-#define HID_REPORT_ID_3                                 0x13
-#define HID_REPORT_ID_4                                 0x14
-
 #define DS4_DESCRIPTOR_SIZE                             0x0029
 #if defined(_X86_)
 #define DS4_CONFIGURATION_SIZE                          0x0050
 #else
 #define DS4_CONFIGURATION_SIZE                          0x0070
 #endif
-#define DS4_HID_REPORT_DESCRIPTOR_SIZE                  0x01D3
+#define DS4_HID_REPORT_DESCRIPTOR_SIZE                  0x00CB
 
-#define DS4_MANUFACTURER_NAME_LENGTH                    0x38
-#define DS4_PRODUCT_NAME_LENGTH                         0x28
+#define DS4_MANUFACTURER_NAME_LENGTH                    0x24
+#define DS4_PRODUCT_NAME_LENGTH                         0x1E
+#define DS4_SERIAL_NAME_LENGTH							0x1A
 #define DS4_OUTPUT_BUFFER_OFFSET                        0x04
 #define DS4_OUTPUT_BUFFER_LENGTH                        0x05
 
 #define DS4_REPORT_SIZE                                 0x40
-#define DS4_QUEUE_FLUSH_PERIOD                          0x05
+#define DS4_QUEUE_FLUSH_PERIOD                          0x08
 
 
 //

@@ -27,7 +27,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     UNICODE_STRING buffer;
 
     // prepare device description
-    status = RtlUnicodeStringInit(DeviceDescription, L"Virtual DualShock 4 Controller");
+    status = RtlUnicodeStringInit(DeviceDescription, L"Virtual Nintendo Switch Pro Controller");
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
@@ -38,7 +38,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     }
 
     // Set hardware IDs
-    RtlUnicodeStringInit(&buffer, L"USB\\VID_054C&PID_05C4&REV_0100");
+    RtlUnicodeStringInit(&buffer, L"USB\\VID_057E&PID_2009&REV_0100");
 
     status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
@@ -52,7 +52,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
 
     RtlUnicodeStringCopy(DeviceId, &buffer);
 
-    RtlUnicodeStringInit(&buffer, L"USB\\VID_054C&PID_05C4");
+    RtlUnicodeStringInit(&buffer, L"USB\\VID_057E&PID_2009");
 
     status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
@@ -135,14 +135,14 @@ NTSTATUS Ds4_PrepareHardware(WDFDEVICE Device)
     // Set default HID input report (everything zero`d)
     UCHAR DefaultHidReport[DS4_REPORT_SIZE] =
     {
-        0x01, 0x82, 0x7F, 0x7E, 0x80, 0x08, 0x00, 0x58,
-        0x00, 0x00, 0xFD, 0x63, 0x06, 0x03, 0x00, 0xFE,
-        0xFF, 0xFC, 0xFF, 0x79, 0xFD, 0x1B, 0x14, 0xD1,
-        0xE9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1B, 0x00,
-        0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x80,
-        0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00,
-        0x80, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00,
-        0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
 
     // Initialize HID reports to defaults
@@ -219,7 +219,7 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
         return status;
     }
 
-    RtlUnicodeStringInit(&keyName, L"DualShock");
+    RtlUnicodeStringInit(&keyName, L"NintendoSwitchPro");
 
     status = WdfRegistryCreateKey(
         keyTargets,
@@ -334,21 +334,21 @@ VOID Ds4_GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
         0x00,        // bCountryCode
         0x01,        // bNumDescriptors
         0x22,        // bDescriptorType[0] (HID)
-        0xD3, 0x01,  // wDescriptorLength[0] 467
+        0xCB, 0x00,  // wDescriptorLength[0] 467
 
         0x07,        // bLength
         0x05,        // bDescriptorType (Endpoint)
-        0x84,        // bEndpointAddress (IN/D2H)
+        0x81,        // bEndpointAddress (IN/D2H)
         0x03,        // bmAttributes (Interrupt)
         0x40, 0x00,  // wMaxPacketSize 64
-        0x05,        // bInterval 5 (unit depends on device speed)
+        0x08,        // bInterval 5 (unit depends on device speed)
 
         0x07,        // bLength
         0x05,        // bDescriptorType (Endpoint)
-        0x03,        // bEndpointAddress (OUT/H2D)
+        0x01,        // bEndpointAddress (OUT/H2D)
         0x03,        // bmAttributes (Interrupt)
         0x40, 0x00,  // wMaxPacketSize 64
-        0x05,        // bInterval 5 (unit depends on device speed)
+        0x08,        // bInterval 5 (unit depends on device speed)
 
                      // 41 bytes
 
@@ -369,10 +369,10 @@ VOID Ds4_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE
     pDescriptor->bMaxPacketSize0 = 0x40;
     pDescriptor->idVendor = pCommon->VendorId;
     pDescriptor->idProduct = pCommon->ProductId;
-    pDescriptor->bcdDevice = 0x0100;
+    pDescriptor->bcdDevice = 0x0200;
     pDescriptor->iManufacturer = 0x01;
     pDescriptor->iProduct = 0x02;
-    pDescriptor->iSerialNumber = 0x00;
+    pDescriptor->iSerialNumber = 0x03;
     pDescriptor->bNumConfigurations = 0x01;
 }
 
@@ -394,18 +394,18 @@ VOID Ds4_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 
     pInfo->Pipes[0].MaximumTransferSize = 0x00400000;
     pInfo->Pipes[0].MaximumPacketSize = 0x40;
-    pInfo->Pipes[0].EndpointAddress = 0x84;
-    pInfo->Pipes[0].Interval = 0x05;
+    pInfo->Pipes[0].EndpointAddress = 0x81;
+    pInfo->Pipes[0].Interval = 0x08;
     pInfo->Pipes[0].PipeType = 0x03;
-    pInfo->Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0084;
+    pInfo->Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0081;
     pInfo->Pipes[0].PipeFlags = 0x00;
 
     pInfo->Pipes[1].MaximumTransferSize = 0x00400000;
     pInfo->Pipes[1].MaximumPacketSize = 0x40;
-    pInfo->Pipes[1].EndpointAddress = 0x03;
-    pInfo->Pipes[1].Interval = 0x05;
+    pInfo->Pipes[1].EndpointAddress = 0x01;
+    pInfo->Pipes[1].Interval = 0x08;
     pInfo->Pipes[1].PipeType = 0x03;
-    pInfo->Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0003;
+    pInfo->Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0001;
     pInfo->Pipes[1].PipeFlags = 0x00;
 }
 

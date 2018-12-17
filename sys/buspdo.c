@@ -802,7 +802,7 @@ VOID Pdo_EvtIoInternalDeviceControl(
                 TRACE_BUSPDO,
                 ">> >> URB_FUNCTION_CLASS_INTERFACE");
 
-            status = UsbPdo_ClassInterface(urb, hDevice, pdoData);
+			status = STATUS_SUCCESS;
 
             break;
 
