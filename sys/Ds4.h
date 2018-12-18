@@ -27,7 +27,7 @@
 #endif
 #define DS4_HID_REPORT_DESCRIPTOR_SIZE                  0x00CB
 
-#define DS4_MANUFACTURER_NAME_LENGTH                    0x24
+#define DS4_MANUFACTURER_NAME_LENGTH                    0x25
 #define DS4_PRODUCT_NAME_LENGTH                         0x1E
 #define DS4_SERIAL_NAME_LENGTH							0x1A
 #define DS4_OUTPUT_BUFFER_OFFSET                        0x04
