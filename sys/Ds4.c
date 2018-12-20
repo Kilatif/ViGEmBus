@@ -135,9 +135,9 @@ NTSTATUS Ds4_PrepareHardware(WDFDEVICE Device)
     // Set default HID input report (everything zero`d)
     UCHAR DefaultHidReport[DS4_REPORT_SIZE] =
     {
+        0x22, 0x33, 0x20, 0x00, 0x25, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -446,10 +446,23 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
         PUCHAR Buffer = (PUCHAR)urb->UrbBulkOrInterruptTransfer.TransferBuffer;
         // Set buffer length to report size
         urb->UrbBulkOrInterruptTransfer.TransferBufferLength = DS4_REPORT_SIZE;
+			           // Copy cached report to transfer buffer 
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "TEST BYTE : %d", ds4Data->Report[0]);
+		if (Buffer)
+		{
+			RtlCopyBytes(Buffer, ds4Data->Report, DS4_REPORT_SIZE);
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "COMPLETE TRANSFER. CONTROL BYTE : %d", Buffer[0]);
+		}
 
-        // Copy cached report to transfer buffer 
-        if (Buffer)
-            RtlCopyBytes(Buffer, ds4Data->Report, DS4_REPORT_SIZE);
+		if (urb->UrbBulkOrInterruptTransfer.TransferFlags & USBD_TRANSFER_DIRECTION_IN
+			&& urb->UrbBulkOrInterruptTransfer.PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0081)
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "TRANSFER DATA SUCCEED");
+		}
+		else
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "PIPEHANDLE = %p   FLAGS = %d", urb->UrbBulkOrInterruptTransfer.PipeHandle, urb->UrbBulkOrInterruptTransfer.TransferFlags);
+		}
 
         // Complete pending request
         WdfRequestComplete(usbRequest, status);

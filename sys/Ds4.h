@@ -30,8 +30,8 @@
 #define DS4_MANUFACTURER_NAME_LENGTH                    0x25
 #define DS4_PRODUCT_NAME_LENGTH                         0x1E
 #define DS4_SERIAL_NAME_LENGTH							0x1A
-#define DS4_OUTPUT_BUFFER_OFFSET                        0x04
-#define DS4_OUTPUT_BUFFER_LENGTH                        0x05
+#define DS4_OUTPUT_BUFFER_OFFSET                        0x00
+#define DS4_OUTPUT_BUFFER_LENGTH                        0x40
 
 #define DS4_REPORT_SIZE                                 0x40
 #define DS4_QUEUE_FLUSH_PERIOD                          0x08

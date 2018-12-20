@@ -760,6 +760,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
     {
         PDS4_DEVICE_DATA ds4Data = Ds4GetData(Device);
 
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBPDO, "PIPEHANDLE = %p   FLAGS = %d", urb->UrbBulkOrInterruptTransfer.PipeHandle, urb->UrbBulkOrInterruptTransfer.TransferFlags);
         // Data coming FROM us TO higher driver
         if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN
             && pTransfer->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0081)
@@ -775,6 +776,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
             return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
         }
+	
 
         // Store relevant bytes of buffer in PDO context
         RtlCopyBytes(&ds4Data->OutputReport,
