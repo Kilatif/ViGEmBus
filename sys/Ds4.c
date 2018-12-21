@@ -131,6 +131,7 @@ NTSTATUS Ds4_PrepareHardware(WDFDEVICE Device)
     }
 
     PDS4_DEVICE_DATA ds4Data = Ds4GetData(Device);
+	ds4Data->TimerStatus = 0;
 	
     // Set default HID input report (everything zero`d)
     UCHAR DefaultHidReport[DS4_REPORT_SIZE] =
@@ -429,6 +430,11 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
     hChild = WdfTimerGetParentObject(Timer);
     pdoData = PdoGetData(hChild);
     ds4Data = Ds4GetData(hChild);
+
+	if (ds4Data->TimerStatus == 0)
+	{
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "%!FUNC! Exit because timer disabled");
+	}
 
 	// Get pending USB request
     status = WdfIoQueueRetrieveNextRequest(pdoData->PendingUsbInRequests, &usbRequest);

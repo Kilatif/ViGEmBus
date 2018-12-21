@@ -42,6 +42,7 @@
 // 
 typedef struct _DS4_DEVICE_DATA
 {
+	UCHAR TimerStatus;
     //
     // HID Input Report buffer
     //
