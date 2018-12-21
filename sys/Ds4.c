@@ -434,6 +434,7 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
 	if (ds4Data->TimerStatus == 0)
 	{
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "%!FUNC! Exit because timer disabled");
+		return;
 	}
 
 	// Get pending USB request

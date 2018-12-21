@@ -773,13 +773,19 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
 
         urb->UrbBulkOrInterruptTransfer.TransferBufferLength = DS4_REPORT_SIZE;
 
+		PDS4_DEVICE_DATA ds4Data = Ds4GetData(hChild);
+		if (((PDS4_SUBMIT_REPORT)Report)->Report.TimerStatus != 2)
+		{
+			ds4Data->TimerStatus = ((PDS4_SUBMIT_REPORT)Report)->Report.TimerStatus;
+		}
+
         /* Copy report to cache and transfer buffer
          * Skip first byte as it contains the never changing report id */
-        RtlCopyBytes(Ds4GetData(hChild)->Report, &((PDS4_SUBMIT_REPORT)Report)->Report.Report, sizeof(DS4_REPORT));
-		//RtlCopyBytes(Ds4GetData(hChild)->Report, &((PDS4_SUBMIT_REPORT)Report)->Report.sixaxes, 12);
+		if (((PDS4_SUBMIT_REPORT)Report)->Report.TimerStatus == 1)
+			RtlCopyBytes(ds4Data->Report, &((PDS4_SUBMIT_REPORT)Report)->Report.Report, DS4_REPORT_SIZE);
 
         if (Buffer)
-            RtlCopyBytes(Buffer, Ds4GetData(hChild)->Report, DS4_REPORT_SIZE);
+            RtlCopyBytes(Buffer, &((PDS4_SUBMIT_REPORT)Report)->Report.Report, DS4_REPORT_SIZE);
 
         break;
     case XboxOneWired:
