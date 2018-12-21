@@ -775,7 +775,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
 
         /* Copy report to cache and transfer buffer
          * Skip first byte as it contains the never changing report id */
-        RtlCopyBytes(Ds4GetData(hChild)->Report, &((PDS4_SUBMIT_REPORT)Report)->Report, sizeof(DS4_REPORT));
+        RtlCopyBytes(Ds4GetData(hChild)->Report, &((PDS4_SUBMIT_REPORT)Report)->Report.Report, sizeof(DS4_REPORT));
 		//RtlCopyBytes(Ds4GetData(hChild)->Report, &((PDS4_SUBMIT_REPORT)Report)->Report.sixaxes, 12);
 
         if (Buffer)
