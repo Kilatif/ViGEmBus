@@ -32,7 +32,7 @@
         WPP_DEFINE_BIT(TRACE_BUSPDO)                                   \
         WPP_DEFINE_BIT(TRACE_BYTEARRAY)                                \
         WPP_DEFINE_BIT(TRACE_DRIVER)                                   \
-        WPP_DEFINE_BIT(TRACE_DS4)                                      \
+        WPP_DEFINE_BIT(TRACE_NSWITCH)                                      \
         WPP_DEFINE_BIT(TRACE_QUEUE)                                    \
         WPP_DEFINE_BIT(TRACE_USBPDO)                                   \
         WPP_DEFINE_BIT(TRACE_UTIL)                                     \

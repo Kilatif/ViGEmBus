@@ -126,7 +126,7 @@ NTSTATUS Bus_PlugInDevice(
             description.ProductId = 0x028E;
 
             break;
-        case DualShock4Wired:
+        case NintendoSwitchWired:
 
             description.VendorId = 0x057E;
             description.ProductId = 0x2009;
@@ -434,7 +434,7 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
     WDFDEVICE                   hChild;
     PPDO_DEVICE_DATA            pdoData;
     PXUSB_DEVICE_DATA           xusbData;
-    PDS4_DEVICE_DATA            ds4Data;
+    PNSWITCH_DEVICE_DATA            nintSwitchData;
 
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
@@ -490,15 +490,15 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
         status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
 
         break;
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
-        ds4Data = Ds4GetData(hChild);
+        nintSwitchData = NintSwitchGetData(hChild);
 
-        if (ds4Data == NULL)
+        if (nintSwitchData == NULL)
         {
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_BUSENUM,
-                "Ds4GetData failed");
+                "NintSwitchGetData failed");
             break;
         }
 
@@ -531,9 +531,9 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 }
 
 //
-// Sends a report update to a DS4 PDO.
+// Sends a report update to a NSWITCH PDO.
 // 
-NTSTATUS Bus_Ds4SubmitReport(WDFDEVICE Device, ULONG SerialNo, PDS4_SUBMIT_REPORT Report, BOOLEAN FromInterface)
+NTSTATUS Bus_NintSwitchSubmitReport(WDFDEVICE Device, ULONG SerialNo, PNSWITCH_SUBMIT_REPORT Report, BOOLEAN FromInterface)
 {
     TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
 
@@ -627,7 +627,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
             sizeof(XUSB_REPORT)) != sizeof(XUSB_REPORT));
 
         break;
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
         changed = TRUE;
 
@@ -667,7 +667,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
         status = WdfIoQueueRetrieveNextRequest(pdoData->PendingUsbInRequests, &usbRequest);
 
         break;
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
         status = WdfIoQueueRetrieveNextRequest(pdoData->PendingUsbInRequests, &usbRequest);
 
@@ -769,23 +769,23 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
         RtlCopyBytes(Buffer, &XusbGetData(hChild)->Packet, sizeof(XUSB_INTERRUPT_IN_PACKET));
 
         break;
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
-        urb->UrbBulkOrInterruptTransfer.TransferBufferLength = DS4_REPORT_SIZE;
+        urb->UrbBulkOrInterruptTransfer.TransferBufferLength = NSWITCH_REPORT_SIZE;
 
-		PDS4_DEVICE_DATA ds4Data = Ds4GetData(hChild);
-		if (((PDS4_SUBMIT_REPORT)Report)->Report.TimerStatus != 2)
+		PNSWITCH_DEVICE_DATA nintSwitchData = NintSwitchGetData(hChild);
+		if (((PNSWITCH_SUBMIT_REPORT)Report)->Report.TimerStatus != 2)
 		{
-			ds4Data->TimerStatus = ((PDS4_SUBMIT_REPORT)Report)->Report.TimerStatus;
+			nintSwitchData->TimerStatus = ((PNSWITCH_SUBMIT_REPORT)Report)->Report.TimerStatus;
 		}
 
         /* Copy report to cache and transfer buffer
          * Skip first byte as it contains the never changing report id */
-		if (((PDS4_SUBMIT_REPORT)Report)->Report.TimerStatus == 1)
-			RtlCopyBytes(ds4Data->Report, &((PDS4_SUBMIT_REPORT)Report)->Report.Report, DS4_REPORT_SIZE);
+		if (((PNSWITCH_SUBMIT_REPORT)Report)->Report.TimerStatus == 1)
+			RtlCopyBytes(nintSwitchData->Report, &((PNSWITCH_SUBMIT_REPORT)Report)->Report.Report, NSWITCH_REPORT_SIZE);
 
         if (Buffer)
-            RtlCopyBytes(Buffer, &((PDS4_SUBMIT_REPORT)Report)->Report.Report, DS4_REPORT_SIZE);
+            RtlCopyBytes(Buffer, &((PNSWITCH_SUBMIT_REPORT)Report)->Report.Report, NSWITCH_REPORT_SIZE);
 
         break;
     case XboxOneWired:

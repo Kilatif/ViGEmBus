@@ -19,9 +19,9 @@
 
 #include "busenum.h"
 #include <hidclass.h>
-#include "ds4.tmh"
+#include "NintSwitch.tmh"
 
-NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
+NTSTATUS NintSwitch_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
 {
     NTSTATUS status;
     UNICODE_STRING buffer;
@@ -31,7 +31,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "RtlUnicodeStringInit failed with status %!STATUS!",
             status);
         return status;
@@ -44,7 +44,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfPdoInitAddHardwareID failed with status %!STATUS!",
             status);
         return status;
@@ -58,7 +58,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfPdoInitAddHardwareID failed with status %!STATUS!",
             status);
         return status;
@@ -71,7 +71,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfPdoInitAddCompatibleID (#01) failed with status %!STATUS!",
             status);
         return status;
@@ -83,7 +83,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfPdoInitAddCompatibleID (#02) failed with status %!STATUS!",
             status);
         return status;
@@ -95,7 +95,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfPdoInitAddCompatibleID (#03) failed with status %!STATUS!",
             status);
         return status;
@@ -104,7 +104,7 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     return STATUS_SUCCESS;
 }
 
-NTSTATUS Ds4_PrepareHardware(WDFDEVICE Device)
+NTSTATUS NintSwitch_PrepareHardware(WDFDEVICE Device)
 {
     NTSTATUS status;
     WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
@@ -124,17 +124,17 @@ NTSTATUS Ds4_PrepareHardware(WDFDEVICE Device)
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfDeviceAddQueryInterface failed with status %!STATUS!",
             status);
         return status;
     }
 
-    PDS4_DEVICE_DATA ds4Data = Ds4GetData(Device);
-	ds4Data->TimerStatus = 0;
+    PNSWITCH_DEVICE_DATA nintSwitchData = NintSwitchGetData(Device);
+	nintSwitchData->TimerStatus = 0;
 	
     // Set default HID input report (everything zero`d)
-    UCHAR DefaultHidReport[DS4_REPORT_SIZE] =
+    UCHAR DefaultHidReport[NSWITCH_REPORT_SIZE] =
     {
         0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -147,23 +147,23 @@ NTSTATUS Ds4_PrepareHardware(WDFDEVICE Device)
     };
 
     // Initialize HID reports to defaults
-    RtlCopyBytes(ds4Data->Report, DefaultHidReport, DS4_REPORT_SIZE);
-    RtlZeroMemory(&ds4Data->OutputReport, sizeof(DS4_OUTPUT_REPORT));
+    RtlCopyBytes(nintSwitchData->Report, DefaultHidReport, NSWITCH_REPORT_SIZE);
+    RtlZeroMemory(&nintSwitchData->OutputReport, sizeof(NSWITCH_OUTPUT_REPORT));
 
     // Start pending IRP queue flush timer
-    WdfTimerStart(ds4Data->PendingUsbInRequestsTimer, DS4_QUEUE_FLUSH_PERIOD);
+    WdfTimerStart(nintSwitchData->PendingUsbInRequestsTimer, NSWITCH_QUEUE_FLUSH_PERIOD);
 
     return STATUS_SUCCESS;
 }
 
-NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION Description)
+NTSTATUS NintSwitch_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION Description)
 {
     NTSTATUS            status;
-    PDS4_DEVICE_DATA    ds4 = Ds4GetData(Device);
+    PNSWITCH_DEVICE_DATA    nintSwitch = NintSwitchGetData(Device);
 
     // Initialize periodic timer
     WDF_TIMER_CONFIG timerConfig;
-    WDF_TIMER_CONFIG_INIT_PERIODIC(&timerConfig, Ds4_PendingUsbRequestsTimerFunc, DS4_QUEUE_FLUSH_PERIOD);
+    WDF_TIMER_CONFIG_INIT_PERIODIC(&timerConfig, NintSwitch_PendingUsbRequestsTimerFunc, NSWITCH_QUEUE_FLUSH_PERIOD);
 
     // Timer object attributes
     WDF_OBJECT_ATTRIBUTES timerAttribs;
@@ -173,11 +173,11 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     timerAttribs.ParentObject = Device;
 
     // Create timer
-    status = WdfTimerCreate(&timerConfig, &timerAttribs, &ds4->PendingUsbInRequestsTimer);
+    status = WdfTimerCreate(&timerConfig, &timerAttribs, &nintSwitch->PendingUsbInRequestsTimer);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfTimerCreate failed with status %!STATUS!",
             status);
         return status;
@@ -194,7 +194,7 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfDriverOpenParametersRegistryKey failed with status %!STATUS!",
             status);
         return status;
@@ -214,7 +214,7 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfRegistryCreateKey failed with status %!STATUS!",
             status);
         return status;
@@ -234,7 +234,7 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfRegistryCreateKey failed with status %!STATUS!",
             status);
         return status;
@@ -255,7 +255,7 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfRegistryCreateKey failed with status %!STATUS!",
             status);
         return status;
@@ -263,27 +263,27 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
 
     RtlUnicodeStringInit(&valueName, L"TargetMacAddress");
 
-    status = WdfRegistryQueryValue(keySerial, &valueName, sizeof(MAC_ADDRESS), &ds4->TargetMacAddress, NULL, NULL);
+    status = WdfRegistryQueryValue(keySerial, &valueName, sizeof(MAC_ADDRESS), &nintSwitch->TargetMacAddress, NULL, NULL);
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
-        TRACE_DS4,
+        TRACE_NSWITCH,
         "MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
-        ds4->TargetMacAddress.Vendor0,
-        ds4->TargetMacAddress.Vendor1,
-        ds4->TargetMacAddress.Vendor2,
-        ds4->TargetMacAddress.Nic0,
-        ds4->TargetMacAddress.Nic1,
-        ds4->TargetMacAddress.Nic2);
+        nintSwitch->TargetMacAddress.Vendor0,
+        nintSwitch->TargetMacAddress.Vendor1,
+        nintSwitch->TargetMacAddress.Vendor2,
+        nintSwitch->TargetMacAddress.Nic0,
+        nintSwitch->TargetMacAddress.Nic1,
+        nintSwitch->TargetMacAddress.Nic2);
 
     if (status == STATUS_OBJECT_NAME_NOT_FOUND)
     {
-        GenerateRandomMacAddress(&ds4->TargetMacAddress);
+        GenerateRandomMacAddress(&nintSwitch->TargetMacAddress);
 
-        status = WdfRegistryAssignValue(keySerial, &valueName, REG_BINARY, sizeof(MAC_ADDRESS), (PVOID)&ds4->TargetMacAddress);
+        status = WdfRegistryAssignValue(keySerial, &valueName, REG_BINARY, sizeof(MAC_ADDRESS), (PVOID)&nintSwitch->TargetMacAddress);
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_DS4,
+                TRACE_NSWITCH,
                 "WdfRegistryAssignValue failed with status %!STATUS!",
                 status);
             return status;
@@ -292,7 +292,7 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     else if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DS4,
+            TRACE_NSWITCH,
             "WdfRegistryQueryValue failed with status %!STATUS!",
             status);
         return status;
@@ -306,9 +306,9 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     return STATUS_SUCCESS;
 }
 
-VOID Ds4_GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
+VOID NintSwitch_GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
 {
-    UCHAR Ds4DescriptorData[DS4_DESCRIPTOR_SIZE] =
+    UCHAR NintSwitchDescriptorData[NSWITCH_DESCRIPTOR_SIZE] =
     {
         0x09,        // bLength
         0x02,        // bDescriptorType (Configuration)
@@ -356,10 +356,10 @@ VOID Ds4_GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
                      // best guess: USB Standard Descriptor
     };
 
-    RtlCopyBytes(Buffer, Ds4DescriptorData, Length);
+    RtlCopyBytes(Buffer, NintSwitchDescriptorData, Length);
 }
 
-VOID Ds4_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE_DATA pCommon)
+VOID NintSwitch_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE_DATA pCommon)
 {
     pDescriptor->bLength = 0x12;
     pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;
@@ -377,10 +377,10 @@ VOID Ds4_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE
     pDescriptor->bNumConfigurations = 0x01;
 }
 
-VOID Ds4_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
+VOID NintSwitch_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 {
     TraceEvents(TRACE_LEVEL_VERBOSE,
-        TRACE_DS4,
+        TRACE_NSWITCH,
         ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
@@ -413,27 +413,27 @@ VOID Ds4_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 //
 // Completes pending I/O requests if feeder is too slow.
 // 
-VOID Ds4_PendingUsbRequestsTimerFunc(
+VOID NintSwitch_PendingUsbRequestsTimerFunc(
     _In_ WDFTIMER Timer
 )
 {
     NTSTATUS                status;
     WDFREQUEST              usbRequest;
     WDFDEVICE               hChild;
-    PDS4_DEVICE_DATA        ds4Data;
+    PNSWITCH_DEVICE_DATA        nintSwitchData;
     PIRP                    pendingIrp;
     PIO_STACK_LOCATION      irpStack;
     PPDO_DEVICE_DATA        pdoData;
 
-    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DS4, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_NSWITCH, "%!FUNC! Entry");
 
     hChild = WdfTimerGetParentObject(Timer);
     pdoData = PdoGetData(hChild);
-    ds4Data = Ds4GetData(hChild);
+    nintSwitchData = NintSwitchGetData(hChild);
 
-	if (ds4Data->TimerStatus == 0)
+	if (nintSwitchData->TimerStatus == 0)
 	{
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "%!FUNC! Exit because timer disabled");
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "%!FUNC! Exit because timer disabled");
 		return;
 	}
 
@@ -452,29 +452,29 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
         // Get transfer buffer
         PUCHAR Buffer = (PUCHAR)urb->UrbBulkOrInterruptTransfer.TransferBuffer;
         // Set buffer length to report size
-        urb->UrbBulkOrInterruptTransfer.TransferBufferLength = DS4_REPORT_SIZE;
+        urb->UrbBulkOrInterruptTransfer.TransferBufferLength = NSWITCH_REPORT_SIZE;
 			           // Copy cached report to transfer buffer 
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "TEST BYTE : %d", ds4Data->Report[0]);
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "TEST BYTE : %d", nintSwitchData->Report[0]);
 		if (Buffer)
 		{
-			RtlCopyBytes(Buffer, ds4Data->Report, DS4_REPORT_SIZE);
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "COMPLETE TRANSFER. CONTROL BYTE : %d", Buffer[0]);
+			RtlCopyBytes(Buffer, nintSwitchData->Report, NSWITCH_REPORT_SIZE);
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "COMPLETE TRANSFER. CONTROL BYTE : %d", Buffer[0]);
 		}
 
 		if (urb->UrbBulkOrInterruptTransfer.TransferFlags & USBD_TRANSFER_DIRECTION_IN
 			&& urb->UrbBulkOrInterruptTransfer.PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0081)
 		{
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "TRANSFER DATA SUCCEED");
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "TRANSFER DATA SUCCEED");
 		}
 		else
 		{
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "PIPEHANDLE = %p   FLAGS = %d", urb->UrbBulkOrInterruptTransfer.PipeHandle, urb->UrbBulkOrInterruptTransfer.TransferFlags);
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "PIPEHANDLE = %p   FLAGS = %d", urb->UrbBulkOrInterruptTransfer.PipeHandle, urb->UrbBulkOrInterruptTransfer.TransferFlags);
 		}
 
         // Complete pending request
         WdfRequestComplete(usbRequest, status);
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "%!FUNC! Exit with status %!STATUS!", status);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "%!FUNC! Exit with status %!STATUS!", status);
 }
 

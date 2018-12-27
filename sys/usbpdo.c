@@ -131,9 +131,9 @@ NTSTATUS UsbPdo_GetDeviceDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
 
         break;
 
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
-        Ds4_GetDeviceDescriptorType(pDescriptor, pCommon);
+        NintSwitch_GetDeviceDescriptorType(pDescriptor, pCommon);
 
         break;
 
@@ -169,9 +169,9 @@ NTSTATUS UsbPdo_GetConfigurationDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommo
             Xusb_GetConfigurationDescriptorType(Buffer, length);
 
             break;
-        case DualShock4Wired:
+        case NintendoSwitchWired:
 
-            Ds4_GetConfigurationDescriptorType(Buffer, length);
+            NintSwitch_GetConfigurationDescriptorType(Buffer, length);
 
             break;
         case XboxOneWired:
@@ -197,11 +197,11 @@ NTSTATUS UsbPdo_GetConfigurationDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommo
         }
 
         break;
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
-        if (length >= DS4_DESCRIPTOR_SIZE)
+        if (length >= NSWITCH_DESCRIPTOR_SIZE)
         {
-            Ds4_GetConfigurationDescriptorType(Buffer, DS4_DESCRIPTOR_SIZE);
+            NintSwitch_GetConfigurationDescriptorType(Buffer, NSWITCH_DESCRIPTOR_SIZE);
         }
 
         break;
@@ -221,7 +221,7 @@ NTSTATUS UsbPdo_GetConfigurationDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommo
 }
 
 //
-// Set device string descriptors (currently only used in DS4 emulation).
+// Set device string descriptors (currently only used in NSWITCH emulation).
 // 
 NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
 {
@@ -232,7 +232,7 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
 
     switch (pCommon->TargetType)
     {
-    case DualShock4Wired:
+    case NintendoSwitchWired:
     {
         switch (urb->UrbControlDescriptorRequest.Index)
         {
@@ -256,15 +256,15 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
                 "LanguageId = 0x%X",
                 urb->UrbControlDescriptorRequest.LanguageId);
 
-            if (urb->UrbControlDescriptorRequest.TransferBufferLength < DS4_MANUFACTURER_NAME_LENGTH)
+            if (urb->UrbControlDescriptorRequest.TransferBufferLength < NSWITCH_MANUFACTURER_NAME_LENGTH)
             {
                 PUSB_STRING_DESCRIPTOR pDesc = (PUSB_STRING_DESCRIPTOR)urb->UrbControlDescriptorRequest.TransferBuffer;
-                pDesc->bLength = DS4_MANUFACTURER_NAME_LENGTH;
+                pDesc->bLength = NSWITCH_MANUFACTURER_NAME_LENGTH;
                 break;
             }
 
             // "Sony Computer Entertainment"
-            UCHAR ManufacturerString[DS4_MANUFACTURER_NAME_LENGTH] =
+            UCHAR ManufacturerString[NSWITCH_MANUFACTURER_NAME_LENGTH] =
             {
 				0x26, 0x03, 0x4E, 0x00, 0x69, 0x00, 0x6E, 0x00, 
             	0x74, 0x00,	0x65, 0x00, 0x6E, 0x00, 0x64, 0x00, 
@@ -273,8 +273,8 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
             	0x74, 0x00,	0x64, 0x00, 0x2E
             };
 
-            urb->UrbControlDescriptorRequest.TransferBufferLength = DS4_MANUFACTURER_NAME_LENGTH;
-            RtlCopyBytes(urb->UrbControlDescriptorRequest.TransferBuffer, ManufacturerString, DS4_MANUFACTURER_NAME_LENGTH);
+            urb->UrbControlDescriptorRequest.TransferBufferLength = NSWITCH_MANUFACTURER_NAME_LENGTH;
+            RtlCopyBytes(urb->UrbControlDescriptorRequest.TransferBuffer, ManufacturerString, NSWITCH_MANUFACTURER_NAME_LENGTH);
 
             break;
         }
@@ -285,15 +285,15 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
                 "LanguageId = 0x%X",
                 urb->UrbControlDescriptorRequest.LanguageId);
 
-            if (urb->UrbControlDescriptorRequest.TransferBufferLength < DS4_PRODUCT_NAME_LENGTH)
+            if (urb->UrbControlDescriptorRequest.TransferBufferLength < NSWITCH_PRODUCT_NAME_LENGTH)
             {
                 PUSB_STRING_DESCRIPTOR pDesc = (PUSB_STRING_DESCRIPTOR)urb->UrbControlDescriptorRequest.TransferBuffer;
-                pDesc->bLength = DS4_PRODUCT_NAME_LENGTH;
+                pDesc->bLength = NSWITCH_PRODUCT_NAME_LENGTH;
                 break;
             }
 
 			// "Wireless Controller"
-            UCHAR ProductString[DS4_PRODUCT_NAME_LENGTH] =
+            UCHAR ProductString[NSWITCH_PRODUCT_NAME_LENGTH] =
             {
 				0x1E, 0x03, 0x50, 0x00, 0x72, 0x00, 0x6f, 0x00, 
             	0x20, 0x00,	0x43, 0x00, 0x6f, 0x00, 0x6e, 0x00,
@@ -301,8 +301,8 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
             	0x6c, 0x00,	0x65, 0x00, 0x72, 0x00
             };
 
-            urb->UrbControlDescriptorRequest.TransferBufferLength = DS4_PRODUCT_NAME_LENGTH;
-            RtlCopyBytes(urb->UrbControlDescriptorRequest.TransferBuffer, ProductString, DS4_PRODUCT_NAME_LENGTH);
+            urb->UrbControlDescriptorRequest.TransferBufferLength = NSWITCH_PRODUCT_NAME_LENGTH;
+            RtlCopyBytes(urb->UrbControlDescriptorRequest.TransferBuffer, ProductString, NSWITCH_PRODUCT_NAME_LENGTH);
 
             break;
         }
@@ -313,15 +313,15 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
 				"LanguageId = 0x%X",
 				urb->UrbControlDescriptorRequest.LanguageId);
 
-			if (urb->UrbControlDescriptorRequest.TransferBufferLength < DS4_SERIAL_NAME_LENGTH)
+			if (urb->UrbControlDescriptorRequest.TransferBufferLength < NSWITCH_SERIAL_NAME_LENGTH)
 			{
 				PUSB_STRING_DESCRIPTOR pDesc = (PUSB_STRING_DESCRIPTOR)urb->UrbControlDescriptorRequest.TransferBuffer;
-				pDesc->bLength = DS4_SERIAL_NAME_LENGTH;
+				pDesc->bLength = NSWITCH_SERIAL_NAME_LENGTH;
 				break;
 			}
 
 			// "000000000001"
-			UCHAR SerialString[DS4_SERIAL_NAME_LENGTH] =
+			UCHAR SerialString[NSWITCH_SERIAL_NAME_LENGTH] =
 			{
 				0x1A, 0x03, 0x30, 0x00, 0x30, 0x00, 0x30, 0x00, 
 				0x30, 0x00,	0x30, 0x00, 0x30, 0x00, 0x30, 0x00, 
@@ -329,8 +329,8 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
 				0x31, 0x00
 			};
 
-			urb->UrbControlDescriptorRequest.TransferBufferLength = DS4_SERIAL_NAME_LENGTH;
-			RtlCopyBytes(urb->UrbControlDescriptorRequest.TransferBuffer, SerialString, DS4_SERIAL_NAME_LENGTH);
+			urb->UrbControlDescriptorRequest.TransferBufferLength = NSWITCH_SERIAL_NAME_LENGTH;
+			RtlCopyBytes(urb->UrbControlDescriptorRequest.TransferBuffer, SerialString, NSWITCH_SERIAL_NAME_LENGTH);
 
 			break;
 		}
@@ -385,9 +385,9 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
 
         break;
 
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
-        if (urb->UrbHeader.Length < DS4_CONFIGURATION_SIZE)
+        if (urb->UrbHeader.Length < NSWITCH_CONFIGURATION_SIZE)
         {
             TraceEvents(TRACE_LEVEL_WARNING,
                 TRACE_USBPDO,
@@ -395,7 +395,7 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
             return STATUS_INVALID_PARAMETER;
         }
 
-        Ds4_SelectConfiguration(pInfo);
+        NintSwitch_SelectConfiguration(pInfo);
 
         break;
 
@@ -510,7 +510,7 @@ NTSTATUS UsbPdo_SelectInterface(PURB urb, PPDO_DEVICE_DATA pCommon)
             return STATUS_SUCCESS;
         }
     }
-    case DualShock4Wired:
+    case NintendoSwitchWired:
     {
         TraceEvents(TRACE_LEVEL_WARNING,
             TRACE_USBPDO,
@@ -756,9 +756,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
         break;
     }
-    case DualShock4Wired:
+    case NintendoSwitchWired:
     {
-        PDS4_DEVICE_DATA ds4Data = Ds4GetData(Device);
+        PNSWITCH_DEVICE_DATA nintSwitchData = NintSwitchGetData(Device);
 
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBPDO, "PIPEHANDLE = %p   FLAGS = %d", urb->UrbBulkOrInterruptTransfer.PipeHandle, urb->UrbBulkOrInterruptTransfer.TransferFlags);
         // Data coming FROM us TO higher driver
@@ -779,25 +779,25 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 	
 
         // Store relevant bytes of buffer in PDO context
-        RtlCopyBytes(&ds4Data->OutputReport,
-            (PUCHAR)pTransfer->TransferBuffer + DS4_OUTPUT_BUFFER_OFFSET,
-            DS4_OUTPUT_BUFFER_LENGTH);
+        RtlCopyBytes(&nintSwitchData->OutputReport,
+            (PUCHAR)pTransfer->TransferBuffer + NSWITCH_OUTPUT_BUFFER_OFFSET,
+            NSWITCH_OUTPUT_BUFFER_LENGTH);
 
         // Notify user-mode process that new data is available
         status = WdfIoQueueRetrieveNextRequest(pdoData->PendingNotificationRequests, &notifyRequest);
 
         if (NT_SUCCESS(status))
         {
-            PDS4_REQUEST_NOTIFICATION notify = NULL;
+            PNSWITCH_REQUEST_NOTIFICATION notify = NULL;
 
-            status = WdfRequestRetrieveOutputBuffer(notifyRequest, sizeof(DS4_REQUEST_NOTIFICATION), (PVOID)&notify, NULL);
+            status = WdfRequestRetrieveOutputBuffer(notifyRequest, sizeof(NSWITCH_REQUEST_NOTIFICATION), (PVOID)&notify, NULL);
 
             if (NT_SUCCESS(status))
             {
                 // Assign values to output buffer
-                notify->Size = sizeof(DS4_REQUEST_NOTIFICATION);
+                notify->Size = sizeof(NSWITCH_REQUEST_NOTIFICATION);
                 notify->SerialNo = pdoData->SerialNo;
-                notify->Report = ds4Data->OutputReport;
+                notify->Report = nintSwitchData->OutputReport;
 
                 WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
             }
@@ -853,22 +853,22 @@ NTSTATUS UsbPdo_AbortPipe(WDFDEVICE Device)
 
     switch (pdoData->TargetType)
     {
-    case DualShock4Wired:
+    case NintendoSwitchWired:
     {
-        PDS4_DEVICE_DATA ds4 = Ds4GetData(Device);
+        PNSWITCH_DEVICE_DATA nintSwitch = NintSwitchGetData(Device);
 
         // Check context
-        if (ds4 == NULL)
+        if (nintSwitch == NULL)
         {
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_USBPDO,
-                "No DS4 context found on device %p", Device);
+                "No NSWITCH context found on device %p", Device);
 
             return STATUS_UNSUCCESSFUL;
         }
 
         // Higher driver shutting down, emptying PDOs queues
-        WdfTimerStop(ds4->PendingUsbInRequestsTimer, TRUE);
+        WdfTimerStop(nintSwitch->PendingUsbInRequestsTimer, TRUE);
 
         break;
     }
@@ -893,7 +893,7 @@ NTSTATUS UsbPdo_AbortPipe(WDFDEVICE Device)
 NTSTATUS UsbPdo_GetDescriptorFromInterface(PURB urb, PPDO_DEVICE_DATA pCommon)
 {
     NTSTATUS status = STATUS_INVALID_PARAMETER;
-	UCHAR Ds4HidReportDescriptor[DS4_HID_REPORT_DESCRIPTOR_SIZE] =
+	UCHAR NintSwitchHidReportDescriptor[NSWITCH_HID_REPORT_DESCRIPTOR_SIZE] =
 	{
 		0x05, 0x01,                    //   Usage Page (Generic Desktop)
 		0x15, 0x00,                    //   Logical Minimum (0)
@@ -997,11 +997,11 @@ NTSTATUS UsbPdo_GetDescriptorFromInterface(PURB urb, PPDO_DEVICE_DATA pCommon)
 
     switch (pCommon->TargetType)
     {
-    case DualShock4Wired:
+    case NintendoSwitchWired:
     {
-        if (pRequest->TransferBufferLength >= DS4_HID_REPORT_DESCRIPTOR_SIZE)
+        if (pRequest->TransferBufferLength >= NSWITCH_HID_REPORT_DESCRIPTOR_SIZE)
         {
-            RtlCopyMemory(pRequest->TransferBuffer, Ds4HidReportDescriptor, DS4_HID_REPORT_DESCRIPTOR_SIZE);
+            RtlCopyMemory(pRequest->TransferBuffer, NintSwitchHidReportDescriptor, NSWITCH_HID_REPORT_DESCRIPTOR_SIZE);
             status = STATUS_SUCCESS;
         }
 

@@ -170,11 +170,11 @@ NTSTATUS Bus_CreatePdo(
         break;
 
         //
-        // A Sony DualShock 4 device was requested
+        // A Nintendo Switch device was requested
         // 
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
-        status = Ds4_PreparePdo(DeviceInit, &deviceId, &deviceDescription);
+        status = NintSwitch_PreparePdo(DeviceInit, &deviceId, &deviceDescription);
 
         if (!NT_SUCCESS(status))
             goto endCreatePdo;
@@ -309,12 +309,12 @@ NTSTATUS Bus_CreatePdo(
 
         break;
     }
-    case DualShock4Wired:
+    case NintendoSwitchWired:
     {
-        PDS4_DEVICE_DATA ds4Data = NULL;
-        WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&pdoAttributes, DS4_DEVICE_DATA);
+        PNSWITCH_DEVICE_DATA nintSwitchData = NULL;
+        WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&pdoAttributes, NSWITCH_DEVICE_DATA);
 
-        status = WdfObjectAllocateContext(hChild, &pdoAttributes, (PVOID)&ds4Data);
+        status = WdfObjectAllocateContext(hChild, &pdoAttributes, (PVOID)&nintSwitchData);
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR,
@@ -393,9 +393,9 @@ NTSTATUS Bus_CreatePdo(
 
         break;
 
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
-        status = Ds4_AssignPdoContext(hChild, Description);
+        status = NintSwitch_AssignPdoContext(hChild, Description);
 
         break;
 
@@ -549,9 +549,9 @@ NTSTATUS Pdo_EvtDevicePrepareHardware(
 
         break;
 
-    case DualShock4Wired:
+    case NintendoSwitchWired:
 
-        status = Ds4_PrepareHardware(Device);
+        status = NintSwitch_PrepareHardware(Device);
 
         break;
 
@@ -815,9 +815,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
             status = UsbPdo_GetDescriptorFromInterface(urb, pdoData);
 
             //
-            // The DS4 is basically ready to operate at this stage
+            // The NSWITCH is basically ready to operate at this stage
             // 
-            if (pdoData->TargetType == DualShock4Wired)
+            if (pdoData->TargetType == NintendoSwitchWired)
             {
                 //
                 // Report back to FDO that we are ready to operate

@@ -35,7 +35,7 @@
 #include "Util.h"
 #include "UsbPdo.h"
 #include "Xusb.h"
-#include "Ds4.h"
+#include "NintSwitch.h"
 #include "Xgip.h"
 
 

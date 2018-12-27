@@ -185,7 +185,7 @@
     <ClInclude Include="busenum.h" />
     <ClInclude Include="ByteArray.h" />
     <ClInclude Include="Context.h" />
-    <ClInclude Include="Ds4.h" />
+    <ClInclude Include="NintSwitch.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="trace.h" />
@@ -202,7 +202,7 @@
     <ClCompile Include="buspdo.c" />
     <ClCompile Include="ByteArray.c" />
     <ClCompile Include="Driver.c" />
-    <ClCompile Include="Ds4.c" />
+    <ClCompile Include="NintSwitch.c" />
     <ClCompile Include="Queue.c" />
     <ClCompile Include="UsbPdo.c" />
     <ClCompile Include="Util.c" />

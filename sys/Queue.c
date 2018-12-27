@@ -40,8 +40,8 @@ VOID Bus_EvtIoDeviceControl(
     size_t                      length = 0;
     PXUSB_SUBMIT_REPORT         xusbSubmit = NULL;
     PXUSB_REQUEST_NOTIFICATION  xusbNotify = NULL;
-    PDS4_SUBMIT_REPORT          ds4Submit = NULL;
-    PDS4_REQUEST_NOTIFICATION   ds4Notify = NULL;
+    PNSWITCH_SUBMIT_REPORT          nintSwitchSubmit = NULL;
+    PNSWITCH_REQUEST_NOTIFICATION   nintSwitchNotify = NULL;
     PXGIP_SUBMIT_REPORT         xgipSubmit = NULL;
     PXGIP_SUBMIT_INTERRUPT      xgipInterrupt = NULL;
     PVIGEM_CHECK_VERSION        pCheckVersion = NULL;
@@ -186,14 +186,14 @@ VOID Bus_EvtIoDeviceControl(
         break;
 #pragma endregion 
 
-#pragma region IOCTL_DS4_SUBMIT_REPORT
-    case IOCTL_DS4_SUBMIT_REPORT:
+#pragma region IOCTL_NSWITCH_SUBMIT_REPORT
+    case IOCTL_NSWITCH_SUBMIT_REPORT:
 
         TraceEvents(TRACE_LEVEL_VERBOSE,
             TRACE_QUEUE,
-            "IOCTL_DS4_SUBMIT_REPORT");
+            "IOCTL_NSWITCH_SUBMIT_REPORT");
 
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(DS4_SUBMIT_REPORT), (PVOID)&ds4Submit, &length);
+        status = WdfRequestRetrieveInputBuffer(Request, sizeof(NSWITCH_SUBMIT_REPORT), (PVOID)&nintSwitchSubmit, &length);
 
         if (!NT_SUCCESS(status))
         {
@@ -204,10 +204,10 @@ VOID Bus_EvtIoDeviceControl(
             break;
         }
 
-        if ((sizeof(DS4_SUBMIT_REPORT) == ds4Submit->Size) && (length == InputBufferLength))
+        if ((sizeof(NSWITCH_SUBMIT_REPORT) == nintSwitchSubmit->Size) && (length == InputBufferLength))
         {
             // This request only supports a single PDO at a time
-            if (ds4Submit->SerialNo == 0)
+            if (nintSwitchSubmit->SerialNo == 0)
             {
                 TraceEvents(TRACE_LEVEL_ERROR,
                     TRACE_QUEUE,
@@ -217,30 +217,30 @@ VOID Bus_EvtIoDeviceControl(
                 break;
             }
 
-            status = Bus_Ds4SubmitReport(Device, ds4Submit->SerialNo, ds4Submit, FALSE);
+            status = Bus_NintSwitchSubmitReport(Device, nintSwitchSubmit->SerialNo, nintSwitchSubmit, FALSE);
         }
 
         break;
 #pragma endregion 
 
-#pragma region IOCTL_DS4_REQUEST_NOTIFICATION
-    case IOCTL_DS4_REQUEST_NOTIFICATION:
+#pragma region IOCTL_NSWITCH_REQUEST_NOTIFICATION
+    case IOCTL_NSWITCH_REQUEST_NOTIFICATION:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
             TRACE_QUEUE,
-            "IOCTL_DS4_REQUEST_NOTIFICATION");
+            "IOCTL_NSWITCH_REQUEST_NOTIFICATION");
 
         // Don't accept the request if the output buffer can't hold the results
-        if (OutputBufferLength < sizeof(DS4_REQUEST_NOTIFICATION))
+        if (OutputBufferLength < sizeof(NSWITCH_REQUEST_NOTIFICATION))
         {
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_QUEUE,
                 "Output buffer %d too small, require at least %d",
-                (int)OutputBufferLength, (int)sizeof(DS4_REQUEST_NOTIFICATION));
+                (int)OutputBufferLength, (int)sizeof(NSWITCH_REQUEST_NOTIFICATION));
             break;
         }
 
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(DS4_REQUEST_NOTIFICATION), (PVOID)&ds4Notify, &length);
+        status = WdfRequestRetrieveInputBuffer(Request, sizeof(NSWITCH_REQUEST_NOTIFICATION), (PVOID)&nintSwitchNotify, &length);
 
         if (!NT_SUCCESS(status))
         {
@@ -251,10 +251,10 @@ VOID Bus_EvtIoDeviceControl(
             break;
         }
 
-        if ((sizeof(DS4_REQUEST_NOTIFICATION) == ds4Notify->Size) && (length == InputBufferLength))
+        if ((sizeof(NSWITCH_REQUEST_NOTIFICATION) == nintSwitchNotify->Size) && (length == InputBufferLength))
         {
             // This request only supports a single PDO at a time
-            if (ds4Notify->SerialNo == 0)
+            if (nintSwitchNotify->SerialNo == 0)
             {
                 TraceEvents(TRACE_LEVEL_ERROR,
                     TRACE_QUEUE,
@@ -264,7 +264,7 @@ VOID Bus_EvtIoDeviceControl(
                 break;
             }
 
-            status = Bus_QueueNotification(Device, ds4Notify->SerialNo, Request);
+            status = Bus_QueueNotification(Device, nintSwitchNotify->SerialNo, Request);
         }
 
         break;
