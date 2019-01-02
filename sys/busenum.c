@@ -774,7 +774,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
         urb->UrbBulkOrInterruptTransfer.TransferBufferLength = NSWITCH_REPORT_SIZE;
 
 		PNSWITCH_DEVICE_DATA nintSwitchData = NintSwitchGetData(hChild);
-		if (((PNSWITCH_SUBMIT_REPORT)Report)->TimerStatus != 2)
+		if (((PNSWITCH_SUBMIT_REPORT)Report)->TimerStatus != NSWITCH_TIMER_STATUS_IGNORED)
 		{
 			nintSwitchData->TimerStatus = ((PNSWITCH_SUBMIT_REPORT)Report)->TimerStatus;
 		}

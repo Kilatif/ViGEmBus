@@ -33,6 +33,9 @@
 
 #define NSWITCH_REPORT_SIZE                                 0x40
 #define NSWITCH_QUEUE_FLUSH_PERIOD                          0x08
+#define NSWITCH_TIMER_STATUS_DISABLED						0
+#define NSWITCH_TIMER_STATUS_ENABLED_UPDATE					1
+#define NSWITCH_TIMER_STATUS_IGNORED						2
 
 
 //

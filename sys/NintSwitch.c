@@ -131,7 +131,7 @@ NTSTATUS NintSwitch_PrepareHardware(WDFDEVICE Device)
     }
 
     PNSWITCH_DEVICE_DATA nintSwitchData = NintSwitchGetData(Device);
-	nintSwitchData->TimerStatus = 0;
+	nintSwitchData->TimerStatus = NSWITCH_TIMER_STATUS_DISABLED;
 	
     // Set default HID input report (everything zero`d)
     UCHAR DefaultHidReport[NSWITCH_REPORT_SIZE] =
@@ -431,7 +431,7 @@ VOID NintSwitch_PendingUsbRequestsTimerFunc(
     pdoData = PdoGetData(hChild);
     nintSwitchData = NintSwitchGetData(hChild);
 
-	if (nintSwitchData->TimerStatus == 0)
+	if (nintSwitchData->TimerStatus == NSWITCH_TIMER_STATUS_DISABLED)
 	{
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "%!FUNC! Exit because timer disabled");
 		return;
