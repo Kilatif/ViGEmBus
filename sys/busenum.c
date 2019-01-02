@@ -782,7 +782,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
         /* Copy report to cache and transfer buffer
          * Skip first byte as it contains the never changing report id */
 		if (((PNSWITCH_SUBMIT_REPORT)Report)->Report.TimerStatus == 1)
-			RtlCopyBytes(nintSwitchData->Report, &((PNSWITCH_SUBMIT_REPORT)Report)->Report.Report, NSWITCH_REPORT_SIZE);
+			RtlCopyBytes(nintSwitchData->InputReport, &((PNSWITCH_SUBMIT_REPORT)Report)->Report.Report, NSWITCH_REPORT_SIZE);
 
         if (Buffer)
             RtlCopyBytes(Buffer, &((PNSWITCH_SUBMIT_REPORT)Report)->Report.Report, NSWITCH_REPORT_SIZE);

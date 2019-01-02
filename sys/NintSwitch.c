@@ -147,8 +147,8 @@ NTSTATUS NintSwitch_PrepareHardware(WDFDEVICE Device)
     };
 
     // Initialize HID reports to defaults
-    RtlCopyBytes(nintSwitchData->Report, DefaultHidReport, NSWITCH_REPORT_SIZE);
-    RtlZeroMemory(&nintSwitchData->OutputReport, sizeof(NSWITCH_OUTPUT_REPORT));
+    RtlCopyBytes(nintSwitchData->InputReport, DefaultHidReport, NSWITCH_REPORT_SIZE);
+    RtlZeroMemory(&nintSwitchData->OutputReport, NSWITCH_OUTPUT_REPORT_SIZE);
 
     // Start pending IRP queue flush timer
     WdfTimerStart(nintSwitchData->PendingUsbInRequestsTimer, NSWITCH_QUEUE_FLUSH_PERIOD);
@@ -454,24 +454,12 @@ VOID NintSwitch_PendingUsbRequestsTimerFunc(
         // Set buffer length to report size
         urb->UrbBulkOrInterruptTransfer.TransferBufferLength = NSWITCH_REPORT_SIZE;
 			           // Copy cached report to transfer buffer 
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "TEST BYTE : %d", nintSwitchData->Report[0]);
 		if (Buffer)
 		{
-			RtlCopyBytes(Buffer, nintSwitchData->Report, NSWITCH_REPORT_SIZE);
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "COMPLETE TRANSFER. CONTROL BYTE : %d", Buffer[0]);
+			RtlCopyBytes(Buffer, nintSwitchData->InputReport, NSWITCH_REPORT_SIZE);
 		}
 
-		if (urb->UrbBulkOrInterruptTransfer.TransferFlags & USBD_TRANSFER_DIRECTION_IN
-			&& urb->UrbBulkOrInterruptTransfer.PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0081)
-		{
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "TRANSFER DATA SUCCEED");
-		}
-		else
-		{
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_NSWITCH, "PIPEHANDLE = %p   FLAGS = %d", urb->UrbBulkOrInterruptTransfer.PipeHandle, urb->UrbBulkOrInterruptTransfer.TransferFlags);
-		}
-
-        // Complete pending request
+		        // Complete pending request
         WdfRequestComplete(usbRequest, status);
     }
 

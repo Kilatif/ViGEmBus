@@ -30,8 +30,6 @@
 #define NSWITCH_MANUFACTURER_NAME_LENGTH                    0x25
 #define NSWITCH_PRODUCT_NAME_LENGTH                         0x1E
 #define NSWITCH_SERIAL_NAME_LENGTH							0x1A
-#define NSWITCH_OUTPUT_BUFFER_OFFSET                        0x00
-#define NSWITCH_OUTPUT_BUFFER_LENGTH                        0x40
 
 #define NSWITCH_REPORT_SIZE                                 0x40
 #define NSWITCH_QUEUE_FLUSH_PERIOD                          0x08
@@ -46,12 +44,12 @@ typedef struct _NSWITCH_DEVICE_DATA
     //
     // HID Input Report buffer
     //
-    UCHAR Report[NSWITCH_REPORT_SIZE];
+    UCHAR InputReport[NSWITCH_REPORT_SIZE];
 
     //
     // Output report cache
     //
-    NSWITCH_OUTPUT_REPORT OutputReport;
+	UCHAR OutputReport[NSWITCH_REPORT_SIZE];
 
     //
     // Timer for dispatching interrupt transfer

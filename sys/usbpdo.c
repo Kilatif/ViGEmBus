@@ -779,9 +779,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 	
 
         // Store relevant bytes of buffer in PDO context
-        RtlCopyBytes(&nintSwitchData->OutputReport,
-            (PUCHAR)pTransfer->TransferBuffer + NSWITCH_OUTPUT_BUFFER_OFFSET,
-            NSWITCH_OUTPUT_BUFFER_LENGTH);
+        RtlCopyBytes(&nintSwitchData->OutputReport, (PUCHAR)pTransfer->TransferBuffer, NSWITCH_REPORT_SIZE);
 
         // Notify user-mode process that new data is available
         status = WdfIoQueueRetrieveNextRequest(pdoData->PendingNotificationRequests, &notifyRequest);
@@ -797,7 +795,8 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 // Assign values to output buffer
                 notify->Size = sizeof(NSWITCH_REQUEST_NOTIFICATION);
                 notify->SerialNo = pdoData->SerialNo;
-                notify->Report = nintSwitchData->OutputReport;
+
+				RtlCopyMemory(&notify->OutputReport, &nintSwitchData->OutputReport, NSWITCH_OUTPUT_REPORT_SIZE);
 
                 WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
             }
