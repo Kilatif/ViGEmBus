@@ -774,18 +774,18 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
         urb->UrbBulkOrInterruptTransfer.TransferBufferLength = NSWITCH_REPORT_SIZE;
 
 		PNSWITCH_DEVICE_DATA nintSwitchData = NintSwitchGetData(hChild);
-		if (((PNSWITCH_SUBMIT_REPORT)Report)->Report.TimerStatus != 2)
+		if (((PNSWITCH_SUBMIT_REPORT)Report)->TimerStatus != 2)
 		{
-			nintSwitchData->TimerStatus = ((PNSWITCH_SUBMIT_REPORT)Report)->Report.TimerStatus;
+			nintSwitchData->TimerStatus = ((PNSWITCH_SUBMIT_REPORT)Report)->TimerStatus;
 		}
 
         /* Copy report to cache and transfer buffer
          * Skip first byte as it contains the never changing report id */
-		if (((PNSWITCH_SUBMIT_REPORT)Report)->Report.TimerStatus == 1)
-			RtlCopyBytes(nintSwitchData->InputReport, &((PNSWITCH_SUBMIT_REPORT)Report)->Report.Report, NSWITCH_REPORT_SIZE);
+		if (((PNSWITCH_SUBMIT_REPORT)Report)->TimerStatus == 1)
+			RtlCopyBytes(nintSwitchData->InputReport, &((PNSWITCH_SUBMIT_REPORT)Report)->InputReport, NSWITCH_REPORT_SIZE);
 
         if (Buffer)
-            RtlCopyBytes(Buffer, &((PNSWITCH_SUBMIT_REPORT)Report)->Report.Report, NSWITCH_REPORT_SIZE);
+            RtlCopyBytes(Buffer, &((PNSWITCH_SUBMIT_REPORT)Report)->InputReport, NSWITCH_REPORT_SIZE);
 
         break;
     case XboxOneWired:

@@ -148,7 +148,7 @@ NTSTATUS NintSwitch_PrepareHardware(WDFDEVICE Device)
 
     // Initialize HID reports to defaults
     RtlCopyBytes(nintSwitchData->InputReport, DefaultHidReport, NSWITCH_REPORT_SIZE);
-    RtlZeroMemory(&nintSwitchData->OutputReport, NSWITCH_OUTPUT_REPORT_SIZE);
+    RtlZeroMemory(&nintSwitchData->OutputReport, NSWITCH_REPORT_SIZE);
 
     // Start pending IRP queue flush timer
     WdfTimerStart(nintSwitchData->PendingUsbInRequestsTimer, NSWITCH_QUEUE_FLUSH_PERIOD);

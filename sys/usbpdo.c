@@ -796,7 +796,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 notify->Size = sizeof(NSWITCH_REQUEST_NOTIFICATION);
                 notify->SerialNo = pdoData->SerialNo;
 
-				RtlCopyMemory(&notify->OutputReport, &nintSwitchData->OutputReport, NSWITCH_OUTPUT_REPORT_SIZE);
+				RtlCopyMemory(&notify->OutputReport, &nintSwitchData->OutputReport, NSWITCH_REPORT_SIZE);
 
                 WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
             }
